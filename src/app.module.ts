@@ -15,7 +15,7 @@ import { AdminModule } from './admin/admin.module';
   imports: [  RegionModule, DebterModule, DebtModule, PrismaModule, SellersModule, TermsModule, JwtModule.register({
       global: true,
       secret: "secret",
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '15m' },
     }), JwtModule, AuthModule, AdminModule,],
   controllers: [AppController],
   providers: [AppService],

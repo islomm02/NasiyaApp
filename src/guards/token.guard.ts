@@ -13,6 +13,8 @@
     canActivate(context: ExecutionContext): boolean {
       const req: Request = context.switchToHttp().getRequest();
       const token = req.headers['authorization']?.split(' ')[1];
+      console.log(req.headers );
+      
       if (!token) {
         throw new UnauthorizedException('Token not found');
       }
@@ -21,7 +23,7 @@
       if (!data) {
         throw new UnauthorizedException('Invalid token');
       }
-      req['user'] = data.user;
+      req['user'] = data;
       return true;
     }
   }

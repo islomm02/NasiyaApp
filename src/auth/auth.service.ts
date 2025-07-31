@@ -14,7 +14,7 @@ export class AuthService {
       if(!seller){
         return {message: "User not found", status: 404}
       }
-      const match = bcrypt.compareSync(seller.password, loginSellerDto.password)
+      const match = bcrypt.compareSync( loginSellerDto.password,seller.password)
       if(!match){
         return {message: "Invalid password", status: 400}
       }
@@ -23,6 +23,10 @@ export class AuthService {
     } catch (error) {
       return {message: error.message}
     }
+  }
+
+  async me(id: string){
+    return await this.prisma.sellers.findFirst({where: {id}})
   }
 
   async resetPass(resetDto: ResetPasswordDto){
