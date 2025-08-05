@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { RegionService } from './region.service';
 import { CreateRegionDto } from './dto/create-region.dto';
 import { UpdateRegionDto } from './dto/update-region.dto';
+import { ApiQueryComponent } from 'src/hooks/ApiQueryComponent';
+import { GetQueryDto } from 'src/sellers/dto/QueryDto';
 
 @Controller('region')
 export class RegionController {
@@ -12,9 +14,10 @@ export class RegionController {
     return this.regionService.create(createRegionDto);
   }
 
+  @ApiQueryComponent(["name"])
   @Get()
-  findAll() {
-    return this.regionService.findAll();
+  findAll(@Query() query: GetQueryDto) {
+    return this.regionService.findAll(query);
   }
 
   @Get(':id')

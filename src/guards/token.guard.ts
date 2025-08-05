@@ -13,17 +13,29 @@
     canActivate(context: ExecutionContext): boolean {
       const req: Request = context.switchToHttp().getRequest();
       const token = req.headers['authorization']?.split(' ')[1];
-      console.log(req.headers );
       
       if (!token) {
         throw new UnauthorizedException('Token not found');
       }
-      const data = this.jwt.verify(token);
+      try {
+        const data = this.jwt.verify(token);
       
       if (!data) {
         throw new UnauthorizedException('Invalid token');
       }
       req['user'] = data;
       return true;
+      } catch (error) {
+         if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token expired');
+      }
+
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      // boshqa xatoliklar
+      throw new UnauthorizedException('Token tekshiruvida xatolik');
+      }
     }
   }

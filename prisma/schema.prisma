@@ -17,10 +17,14 @@ model Sellers {
   PINcode   Int
   createdAt DateTime            @default(now())
   email     String              @unique
-
+  balance   Int? @default(0)
+  
+  chats Chat[]
   debters   Debters[]
   exampleMessages ExampleMessages[]
 }
+
+
 
 model Debters {
   id        String         @id @default(uuid())
@@ -36,14 +40,20 @@ model Debters {
 }
 
 model Debt {
-  id          String           @id @default(uuid())
-  name        String
-  term        String
-  description String?
-
-  debters     Debters[]
-  payments    Payments[]
-  images      ImagesOfDebts[]
+  id               String           @id @default(uuid())
+  name             String
+  term             Int? 
+  remainingMonths  Int?
+  description      String?
+  status           DebtsStatus @default(NOT_PAID)
+  createdAt        DateTime @default(now())
+  startingTime     DateTime @default(now())
+  summaryAmount    Int   @default(0)
+  remainingAmount  Int   @default(0)
+  monthlyPayment   Int   @default(0)
+  debters          Debters[]
+  payments         Payments[]
+  images           ImagesOfDebts[]
 }
 
 model Admin {
@@ -57,17 +67,18 @@ model Admin {
 model Chat {
   id        String        @id @default(uuid())
   debterId  String
-  message   String
+  message   String[]
   status    MessageStatus @default(SENDING)
-
+  sellerId String
   debter    Debters       @relation(fields: [debterId], references: [id])
+  sellers    Sellers       @relation(fields: [sellerId], references: [id])
 }
 
 model Payments {
   id        String    @id @default(uuid())
   createdAt DateTime  @default(now())
   debtId    String
-
+  month     Int
   debt      Debt      @relation(fields: [debtId], references: [id])
 }
 
@@ -123,4 +134,9 @@ enum MessageStatus {
   SEND
   NOT_SEND
   SENDING
+}
+
+enum DebtsStatus {
+  NOT_PAID
+  PAID
 }

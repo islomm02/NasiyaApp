@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { DebtService } from './debt.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
@@ -15,6 +16,8 @@ import { RoleD } from 'src/decorator/role-decorators';
 import { UsersRole } from '@prisma/client';
 import { RoleGuard } from 'src/guards/role.guard';
 import { TokenGuard } from 'src/guards/token.guard';
+import { GetQueryDto } from 'src/sellers/dto/QueryDto';
+import { ApiQueryComponent } from 'src/hooks/ApiQueryComponent';
 
 @Controller('debt')
 export class DebtController {
@@ -28,9 +31,10 @@ export class DebtController {
     return this.debtService.create(createDebtDto);
   }
 
+  @ApiQueryComponent(["name", "summaryAmount", "term"])
   @Get()
-  findAll() {
-    return this.debtService.findAll();
+  findAll(@Query() query: GetQueryDto) {
+    return this.debtService.findAll(query);
   }
 
   @Get(':id')

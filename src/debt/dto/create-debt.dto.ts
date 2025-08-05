@@ -1,10 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { DebtsStatus } from "@prisma/client";
 
 export class CreateDebtDto {
     @ApiProperty()
     name: string
     @ApiProperty()
-    term: string
+    term: number
     @ApiProperty()
     description: string
+    @ApiProperty()
+    summaryAmount: number
+    remainingMonths: number
+    remainingAmount: number
+    status: DebtsStatus
 }

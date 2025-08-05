@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
 import { DebterService } from './debter.service';
 import { CreateDebterDto } from './dto/create-debter.dto';
 import { UpdateDebterDto } from './dto/update-debter.dto';
@@ -6,6 +6,8 @@ import { RoleD } from 'src/decorator/role-decorators';
 import { TokenGuard } from 'src/guards/token.guard';
 import { RoleGuard } from 'src/guards/role.guard';
 import { UsersRole } from '@prisma/client';
+import { ApiQueryComponent } from 'src/hooks/ApiQueryComponent';
+import { GetQueryDto } from 'src/sellers/dto/QueryDto';
 
 @Controller('debter')
 export class DebterController {
@@ -20,9 +22,11 @@ export class DebterController {
     return this.debterService.create(createDebterDto, req.user.id);
   }
 
+    @ApiQueryComponent(["name", "phone"])
+
   @Get()
-  findAll() {
-    return this.debterService.findAll();
+  findAll(@Query() query: GetQueryDto) {
+    return this.debterService.findAll(query);
   }
 
   @Get(':id')

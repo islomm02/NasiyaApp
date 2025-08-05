@@ -16,17 +16,17 @@ export class AuthController {
   }
   
   
-  @Post("reset-password")
-  resetPasword(@Body() resetDto: ResetPasswordDto) {
-    return this.authService.resetPass(resetDto);
-  }
-
-  // @UseGuards(TokenGuard)
-  // @Get("me")
-  // me(@Request() req){
-  //   console.log(req);
-    
-  //   return this.authService.me(req)
+  // @Post("reset-password")
+  // resetPasword(@Body() resetDto: ResetPasswordDto) {
+  //   return this.authService.resetPass(resetDto);
   // }
+
+  @UseGuards(TokenGuard)
+  @Get("me")
+  me(@Request() req){
+    console.log(req);
+    
+    return this.authService.me(req.user.id)
+  }
 
 }

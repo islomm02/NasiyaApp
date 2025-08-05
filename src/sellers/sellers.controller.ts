@@ -1,12 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Request } from '@nestjs/common';
 import { SellersService } from './sellers.service';
 import { CreateSellerDto } from './dto/create-seller.dto';
 import { UpdateSellerDto } from './dto/update-seller.dto';
 import { RoleD } from 'src/decorator/role-decorators';
 import { UsersRole } from '@prisma/client';
 import { RoleGuard } from 'src/guards/role.guard';
-import { TokenClass } from 'typescript';
 import { TokenGuard } from 'src/guards/token.guard';
+import { ApiQueryComponent } from 'src/hooks/ApiQueryComponent';
+import { GetQueryDto } from './dto/QueryDto';
 
 @Controller('sellers')
 export class SellersController {
@@ -17,18 +18,21 @@ export class SellersController {
     return this.sellersService.create(createSellerDto);
   }
 
+  
+
+  @ApiQueryComponent(["username", "phone"])
   @Get()
-  findAll() {
-    return this.sellersService.findAll();
+  findAll(@Query() query: GetQueryDto) {
+    return this.sellersService.findAll(query);
   }
 
-  // @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
-  // @UseGuards(RoleGuard)
-  // @UseGuards(TokenGuard)
-  // @Get()
-  // getMe() {
-  //   return this.sellersService.getMe(req);
-  // }
+  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
+  @Get()
+  getMe(@Request() req) {
+    return this.sellersService.getMe(req["user"].id);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

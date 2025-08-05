@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateDebterDto } from './dto/create-debter.dto';
 import { UpdateDebterDto } from './dto/update-debter.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GetQueryDto } from 'src/sellers/dto/QueryDto';
 
 @Injectable()
 export class DebterService {
@@ -16,14 +17,53 @@ export class DebterService {
     }
   }
 
-  async findAll() {
-    try {
-      const debters = await this.prisma.debters.findMany()
-      return debters
-    } catch (error) {
-      return {message: error.message}      
-    }
+  async findAll(query: GetQueryDto) {
+  try {
+    const { search, sortBy, order, page, limit } = query;
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.debters.findMany({
+        where: search
+          ? {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            }
+          : {},
+        // @ts-ignore
+        orderBy: {
+          [sortBy || 'name']: order === 'asc' ? 'asc' : 'desc',
+        },
+        skip,
+        take: limitNumber,
+      }),
+      this.prisma.debters.count({
+        where: search
+          ? {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            }
+          : {},
+      }),
+    ]);
+
+    return {
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+      data,
+    };
+  } catch (error) {
+    return { message: error.message };
   }
+}
+
 
   async findOne(id: string) {
     try {

@@ -3,27 +3,73 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { retry } from 'rxjs';
+import { GetQueryDto } from 'src/sellers/dto/QueryDto';
 
 @Injectable()
 export class DebtService {
   constructor(private prisma: PrismaService){}
-  async create(createDebtDto: CreateDebtDto) {
+  async create(data: CreateDebtDto) {
     try {
-      const debt = await this.prisma.debt.create({data: createDebtDto})
+      let monthly = Math.ceil(data.summaryAmount / data.term)
+      console.log(monthly)
+      const remaining = data.summaryAmount
+      const debt = await this.prisma.debt.create({data: {...data, monthlyPayment:monthly, remainingAmount: remaining, remainingMonths: data.term}})
       return debt
     } catch (error) {
       return {message: error.message}
     }
   }
 
-  async findAll() {
-    try {
-      const debts = await this.prisma.debt.findMany()
-      return debts
-    } catch (error) {
-        return {message: error.message}      
-    }
+  async findAll(query: GetQueryDto) {
+  try {
+    const { search, sortBy, order, page, limit } = query;
+    const pageNumber = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.debt.findMany({
+        where: search
+          ? {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            }
+          : {},
+        include: {
+          debters: true,
+        },
+        // @ts-ignore
+        orderBy: {
+          [sortBy || 'name']: order === 'asc' ? 'asc' : 'desc',
+        },
+        skip,
+        take: limitNumber,
+      }),
+      this.prisma.debt.count({
+        where: search
+          ? {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            }
+          : {},
+      }),
+    ]);
+
+    return {
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+      data,
+    };
+  } catch (error) {
+    return { message: error.message };
   }
+}
+
 
   async findOne(id: string) {
     try {
