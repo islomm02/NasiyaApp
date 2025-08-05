@@ -34,7 +34,6 @@
         throw new UnauthorizedException('Invalid token');
       }
 
-      // boshqa xatoliklar
       throw new UnauthorizedException('Token tekshiruvida xatolik');
       }
     }

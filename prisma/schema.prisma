@@ -18,9 +18,12 @@ model Sellers {
   createdAt DateTime            @default(now())
   email     String              @unique
   balance   Int? @default(0)
+  image     String? @default("")
+  refreshToken String?
   
   chats Chat[]
   debters   Debters[]
+  debts   Debt[]
   exampleMessages ExampleMessages[]
 }
 
@@ -51,6 +54,9 @@ model Debt {
   summaryAmount    Int   @default(0)
   remainingAmount  Int   @default(0)
   monthlyPayment   Int   @default(0)
+  sellerId         String?
+
+  seller    Sellers ?       @relation(fields: [sellerId], references: [id])
   debters          Debters[]
   payments         Payments[]
   images           ImagesOfDebts[]

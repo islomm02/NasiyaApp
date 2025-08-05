@@ -18,7 +18,6 @@ export class DebterController {
   @UseGuards(TokenGuard)
   @Post()
   create(@Body() createDebterDto: CreateDebterDto, @Request() req) {
-    console.log(req)
     return this.debterService.create(createDebterDto, req.user.id);
   }
 

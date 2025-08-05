@@ -13,4 +13,6 @@ export class CreateSellerDto {
     PINcode:number
     @ApiProperty()
     email:string
+    @ApiProperty()
+    image:string
 }

@@ -1,32 +1,35 @@
-import { Controller,  Post, Body, UseGuards, Get, Request,} from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Request,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import {  LoginSellerDto } from './dto/create-auth.dto';
-import { ResetPasswordDto } from 'src/admin/dto/create-admin.dto'
+import { LoginSellerDto } from './dto/create-auth.dto';
+import { ResetPasswordDto } from 'src/admin/dto/create-admin.dto';
 import { TokenGuard } from 'src/guards/token.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-
-  
-  @Post("login")
+  @Post('login')
   login(@Body() loginSellerDto: LoginSellerDto) {
     return this.authService.login(loginSellerDto);
   }
-  
-  
-  // @Post("reset-password")
-  // resetPasword(@Body() resetDto: ResetPasswordDto) {
-  //   return this.authService.resetPass(resetDto);
-  // }
 
-  @UseGuards(TokenGuard)
-  @Get("me")
-  me(@Request() req){
-    console.log(req);
-    
-    return this.authService.me(req.user.id)
+  @Post('refresh')
+  async refresh(@Body() refreshToken: string) {
+    return this.authService.refresh(refreshToken);
   }
 
+  @UseGuards(TokenGuard)
+  @Get('me')
+  me(@Request() req) {
+
+    return this.authService.me(req.user.id);
+  }
 }

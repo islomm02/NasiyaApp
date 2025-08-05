@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Request,
 } from '@nestjs/common';
 import { DebtService } from './debt.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
@@ -23,12 +24,12 @@ import { ApiQueryComponent } from 'src/hooks/ApiQueryComponent';
 export class DebtController {
   constructor(private readonly debtService: DebtService) {}
 
-  @RoleD(UsersRole.ADMIN, UsersRole.SELLER)
+  @RoleD(UsersRole.SELLER)
   @UseGuards(RoleGuard)
   @UseGuards(TokenGuard)
   @Post()
-  create(@Body() createDebtDto: CreateDebtDto) {
-    return this.debtService.create(createDebtDto);
+  create(@Body() createDebtDto: CreateDebtDto, @Request() req) {
+    return this.debtService.create(createDebtDto, req.user.id);
   }
 
   @ApiQueryComponent(["name", "summaryAmount", "term"])

@@ -8,12 +8,11 @@ import { GetQueryDto } from 'src/sellers/dto/QueryDto';
 @Injectable()
 export class DebtService {
   constructor(private prisma: PrismaService){}
-  async create(data: CreateDebtDto) {
+  async create(data: CreateDebtDto, sellerId: string) {
     try {
       let monthly = Math.ceil(data.summaryAmount / data.term)
-      console.log(monthly)
       const remaining = data.summaryAmount
-      const debt = await this.prisma.debt.create({data: {...data, monthlyPayment:monthly, remainingAmount: remaining, remainingMonths: data.term}})
+      const debt = await this.prisma.debt.create({data: {...data, monthlyPayment:monthly, remainingAmount: remaining, remainingMonths: data.term, sellerId}})
       return debt
     } catch (error) {
       return {message: error.message}

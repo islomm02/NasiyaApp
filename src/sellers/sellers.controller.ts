@@ -13,6 +13,9 @@ import { GetQueryDto } from './dto/QueryDto';
 export class SellersController {
   constructor(private readonly sellersService: SellersService) {}
 
+  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createSellerDto: CreateSellerDto) {
     return this.sellersService.create(createSellerDto);
@@ -20,6 +23,9 @@ export class SellersController {
 
   
 
+  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @ApiQueryComponent(["username", "phone"])
   @Get()
   findAll(@Query() query: GetQueryDto) {
