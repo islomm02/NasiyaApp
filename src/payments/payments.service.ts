@@ -6,34 +6,52 @@ import { DebtService } from 'src/debt/debt.service';
 import { CreateDebtDto } from 'src/debt/dto/create-debt.dto';
 import { DebtType } from 'src/types';
 import { DebtsStatus } from '@prisma/client';
+import { addMonths } from 'date-fns'
 
 @Injectable()
 export class PaymentsService {
   constructor(private prisma: PrismaService, private debtService: DebtService){}
-  async create(data: CreatePaymentDto) {
-    try {
-      const isPaid = await this.prisma.payments.findFirst({where: {debtId: data.debtId, month: data.month}})
-      if(isPaid){
-        return {message: "Ushbu oy uchun tolov qilingan", status: 200}
-      }
 
-      // @ts-ignore
-      const lastDebt:DebtType = await this.debtService.findOne(data.debtId)
-      const newDebtOptions = {
-        remainingMonths: lastDebt?.remainingMonths - data.month,
-        remainingAmount: lastDebt.remainingAmount - lastDebt.monthlyPayment,
-        status: lastDebt.remainingMonths - data.month == 0 ? DebtsStatus.PAID : DebtsStatus.NOT_PAID
-      }
-      if(lastDebt.remainingMonths - data.month == 0){
-        newDebtOptions.status = DebtsStatus.PAID
-      }
-      await this.debtService.update(data.debtId, newDebtOptions)
-      const payment = await this.prisma.payments.create({data})
-      return payment
-    } catch (error) {
-      return {message: error.message}
+async create(data: CreatePaymentDto) {
+  try {
+    const isPaid = await this.prisma.payments.findFirst({
+      where: { debtId: data.debtId, month: data.month }
+    })
+
+    if (isPaid) {
+      return { message: "Ushbu oy uchun to'lov qilingan", status: 200 }
     }
+
+    // @ts-ignore
+    const lastDebt: DebtType = await this.debtService.findOne(data.debtId)
+
+    const newRemainingMonths = lastDebt.remainingMonths - data.month
+    const newRemainingAmount = lastDebt.remainingAmount - lastDebt.monthlyPayment
+    const isLastMonth = newRemainingMonths <= 0
+
+    const prevNextPaymentDay = lastDebt.nextPaymentDay
+      ? new Date(lastDebt.nextPaymentDay)
+      : new Date()
+
+    const newNextPaymentDay = isLastMonth ? null : addMonths(prevNextPaymentDay, 1)
+
+    const newDebtOptions = {
+      remainingMonths: newRemainingMonths,
+      remainingAmount: newRemainingAmount,
+      status: isLastMonth ? DebtsStatus.PAID : DebtsStatus.NOT_PAID,
+      nextPaymentDay: newNextPaymentDay 
+    }
+
+    await this.debtService.update(data.debtId, newDebtOptions)
+
+    const payment = await this.prisma.payments.create({ data })
+    return payment
+
+  } catch (error) {
+    return { message: error.message }
   }
+}
+
 
   async findAll() {
     try {

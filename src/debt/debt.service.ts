@@ -2,22 +2,40 @@ import { Injectable } from '@nestjs/common';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { retry } from 'rxjs';
 import { GetQueryDto } from 'src/sellers/dto/QueryDto';
+import { addMonths } from 'date-fns'
 
 @Injectable()
 export class DebtService {
   constructor(private prisma: PrismaService){}
-  async create(data: CreateDebtDto, sellerId: string) {
-    try {
-      let monthly = Math.ceil(data.summaryAmount / data.term)
-      const remaining = data.summaryAmount
-      const debt = await this.prisma.debt.create({data: {...data, monthlyPayment:monthly, remainingAmount: remaining, remainingMonths: data.term, sellerId}})
-      return debt
-    } catch (error) {
-      return {message: error.message}
-    }
+
+async create(data: CreateDebtDto, sellerId: string) {
+  try {
+    const monthly = Math.ceil(data.summaryAmount / data.term)
+    const remaining = data.summaryAmount
+
+    const startingTime = new Date()
+    const nextPaymentDay = addMonths(startingTime, 1) 
+
+    const debt = await this.prisma.debt.create({
+      data: {
+        ...data,
+        monthlyPayment: monthly,
+        remainingAmount: remaining,
+        remainingMonths: data.term,
+        sellerId,
+        startingTime,    
+        nextPaymentDay,
+      },
+    })
+
+    return debt
+  } catch (error) {
+    return { message: error.message }
   }
+}
+
+
 
   async findAll(query: GetQueryDto) {
   try {

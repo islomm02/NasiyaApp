@@ -12,6 +12,7 @@ export class DebtType {
   summaryAmount: number;
   remainingAmount: number;
   monthlyPayment: number;
+  nextPaymentDay: string
 }
 
 

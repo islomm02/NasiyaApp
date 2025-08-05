@@ -55,6 +55,7 @@ model Debt {
   remainingAmount  Int   @default(0)
   monthlyPayment   Int   @default(0)
   sellerId         String?
+  nextPaymentDay   DateTime?
 
   seller    Sellers ?       @relation(fields: [sellerId], references: [id])
   debters          Debters[]
