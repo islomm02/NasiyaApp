@@ -37,6 +37,12 @@ export class DebtController {
   findAll(@Query() query: GetQueryDto) {
     return this.debtService.findAll(query);
   }
+  
+  
+  @Get("overdue")
+  overrude() {
+    return this.debtService.overrude();
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
