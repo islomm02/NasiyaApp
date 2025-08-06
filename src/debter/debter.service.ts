@@ -26,6 +26,9 @@ export class DebterService {
 
     const [data, total] = await this.prisma.$transaction([
       this.prisma.debters.findMany({
+        include: {
+          debt: true
+        },
         where: search
           ? {
               name: {
@@ -67,7 +70,7 @@ export class DebterService {
 
   async findOne(id: string) {
     try {
-      const debter = await this.prisma.debters.findFirst({where: {id}})
+      const debter = await this.prisma.debters.findFirst({where: {id}, include: {debt: true}})
       return debter
     } catch (error) {
       return {message: error.message}      
