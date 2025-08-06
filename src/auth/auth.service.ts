@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { LoginSellerDto } from './dto/create-auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
@@ -19,7 +19,8 @@ export class AuthService {
       });
 
       if (!seller) {
-        return { message: "User not found", status: 404 };
+         throw new NotFoundException('User not found');
+
       }
 
       const match = bcrypt.compareSync(loginSellerDto.password, seller.password);
