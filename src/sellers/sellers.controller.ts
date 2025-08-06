@@ -13,9 +13,9 @@ import { GetQueryDto } from './dto/QueryDto';
 export class SellersController {
   constructor(private readonly sellersService: SellersService) {}
 
-  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
-  @UseGuards(RoleGuard)
-  @UseGuards(TokenGuard)
+  // @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  // @UseGuards(RoleGuard)
+  // @UseGuards(TokenGuard)
   @Post()
   create(@Body() createSellerDto: CreateSellerDto) {
     return this.sellersService.create(createSellerDto);
