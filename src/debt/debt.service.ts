@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -14,6 +14,10 @@ export class DebtService {
     try {
       const monthly = Math.ceil(data.summaryAmount / data.term);
       const remaining = data.summaryAmount;
+      const debter = await this.prisma.debters.findFirst({where: {id : data.debterId}})
+      if(!debter){
+        throw new NotFoundException("debter not found")
+      }
 
       const startingTime = new Date();
       const nextPaymentDay = addMonths(startingTime, 1);
@@ -68,7 +72,7 @@ export class DebtService {
               }
             : {},
           include: {
-            debters: true,
+            debter: true,
           },
           // @ts-ignore
           orderBy: {

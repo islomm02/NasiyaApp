@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { LoginSellerDto } from './dto/create-auth.dto';
+import { LoginAdminDto, LoginSellerDto, RefreshDto } from './dto/create-auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
@@ -20,7 +20,7 @@ export class AuthService {
 
       if (!seller) {
          throw new NotFoundException('User not found');
-
+          
       }
 
       const match = bcrypt.compareSync(loginSellerDto.password, seller.password);
@@ -44,14 +44,46 @@ export class AuthService {
     }
   }
 
-  async refresh(refreshToken: string) {
+  async loginAdmin(loginSellerDto: LoginAdminDto) {
     try {
-      const decoded = this.jwt.verify(refreshToken);
+      const seller = await this.prisma.admin.findFirst({
+        where: { username: loginSellerDto.username }
+      });
+
+      if (!seller) {
+         throw new NotFoundException('Admin not found');
+          
+      }
+
+      const match = bcrypt.compareSync(loginSellerDto.password, seller.password);
+      if (!match) {
+        return { message: "Invalid password", status: 400 };
+      }
+
+      const payload = { role: seller.role, id: seller.id };
+
+      const token = this.jwt.sign(payload, { expiresIn: '15m' }); // access token
+      const refreshToken = this.jwt.sign(payload, { expiresIn: '7d' }); // refresh token
+
+      await this.prisma.sellers.update({
+        where: { id: seller.id },
+        data: { refreshToken }
+      });
+
+      return { token, refreshToken };
+    } catch (error) {
+      return { message: error.message };
+    }
+  }
+
+  async refresh(data: RefreshDto) {
+    try {
+      const decoded = this.jwt.verify(data.refreshToken);
       const seller = await this.prisma.sellers.findUnique({
         where: { id: decoded.id }
       });
 
-      if (!seller || seller.refreshToken !== refreshToken) {
+      if (!seller || seller.refreshToken !== data.refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 

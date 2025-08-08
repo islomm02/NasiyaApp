@@ -5,6 +5,4 @@ export class CreateDebterDto {
     name: string
     @ApiProperty()
     phone: string
-    @ApiProperty()
-    debtId: string
 }

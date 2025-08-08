@@ -6,3 +6,16 @@ export class LoginSellerDto {
     @ApiProperty()
     password: string
 }
+
+export class LoginAdminDto {
+    @ApiProperty()
+    username: string
+    @ApiProperty()
+    password: string
+}
+
+export class RefreshDto {
+    @ApiProperty()
+    refreshToken: string
+    
+}

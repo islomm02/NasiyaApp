@@ -30,38 +30,42 @@ model Sellers {
 
 
 model Debters {
-  id        String         @id @default(uuid())
+  id        String              @id @default(uuid())
   name      String
   phone     String
-  debtId    String
   sellerId  String
 
-  debt      Debt           @relation(fields: [debtId], references: [id])
-  seller    Sellers        @relation(fields: [sellerId], references: [id])
+  seller    Sellers             @relation(fields: [sellerId], references: [id])
+  debts     Debt[]             
   chats     Chat[]
   images    ImagesOfDebters[]
 }
 
+
+
 model Debt {
-  id               String           @id @default(uuid())
+  id               String        @id @default(uuid())
   name             String
   term             Int? 
   remainingMonths  Int?
   description      String?
-  status           DebtsStatus @default(NOT_PAID)
-  createdAt        DateTime @default(now())
-  startingTime     DateTime @default(now())
-  summaryAmount    Int   @default(0)
-  remainingAmount  Int   @default(0)
-  monthlyPayment   Int   @default(0)
+  status           DebtsStatus   @default(NOT_PAID)
+  createdAt        DateTime      @default(now())
+  startingTime     DateTime      @default(now())
+  summaryAmount    Int           @default(0)
+  remainingAmount  Int           @default(0)
+  monthlyPayment   Int           @default(0)
   sellerId         String?
+  debterId         String   ?     
   nextPaymentDay   DateTime?
 
-  seller    Sellers ?       @relation(fields: [sellerId], references: [id])
-  debters          Debters[]
+  seller           Sellers?      @relation(fields: [sellerId], references: [id])
+  debter           Debters     ?  @relation(fields: [debterId], references: [id])
   payments         Payments[]
   images           ImagesOfDebts[]
 }
+
+
 
 model Admin {
   id       String     @id @default(uuid())
@@ -113,7 +117,7 @@ model FAQ {
 
 model ImagesOfDebts {
   id      String @id @default(uuid())
-  image   String
+  image   String[]
   debtId  String
 
   debt    Debt   @relation(fields: [debtId], references: [id])

@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginSellerDto } from './dto/create-auth.dto';
+import { LoginAdminDto, LoginSellerDto, RefreshDto } from './dto/create-auth.dto';
 import { ResetPasswordDto } from 'src/admin/dto/create-admin.dto';
 import { TokenGuard } from 'src/guards/token.guard';
 
@@ -21,8 +21,13 @@ export class AuthController {
     return this.authService.login(loginSellerDto);
   }
 
+  @Post('login-admin')
+  loginAdmin(@Body() loginAdminDto: LoginAdminDto) {
+    return this.authService.loginAdmin(loginAdminDto);
+  }
+
   @Post('refresh')
-  async refresh(@Body() refreshToken: string) {
+  async refresh(@Body() refreshToken: RefreshDto) {
     return this.authService.refresh(refreshToken);
   }
 

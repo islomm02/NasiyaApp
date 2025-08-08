@@ -9,6 +9,8 @@ export class CreateDebtDto {
     @ApiProperty()
     description: string
     @ApiProperty()
+    debterId: string
+    @ApiProperty()
     summaryAmount: number
     remainingMonths: number
     remainingAmount: number
