@@ -19,7 +19,7 @@ export class ImagesClientService {
   async findOne(debterId: string) {
     try {
       const img = await this.prisma.imagesOfDebters.findFirst({
-        where: { debterId },
+        where: { debterId : debterId },
       });
       if(img){
         return img;
@@ -27,7 +27,7 @@ export class ImagesClientService {
         throw new NotFoundException("Image not found")
       }
     } catch (error) {
-      return { message: error.message , status: 404};
+      return { message: error.message };
     }
   }
 

@@ -19,7 +19,6 @@ model Sellers {
   email     String              @unique
   balance   Int? @default(0)
   image     String? @default("")
-  refreshToken String?
   
   chats Chat[]
   debters   Debters[]
@@ -34,6 +33,8 @@ model Debters {
   name      String
   phone     String
   sellerId  String
+  star Boolean? @default(false)
+  adress String?
 
   seller    Sellers             @relation(fields: [sellerId], references: [id])
   debts     Debt[]             
@@ -78,11 +79,21 @@ model Admin {
 model Chat {
   id        String        @id @default(uuid())
   debterId  String
-  message   String[]
-  status    MessageStatus @default(SENDING)
-  sellerId String
+  sellerId String? @default("")
+  createdAt DateTime @default(now())
   debter    Debters       @relation(fields: [debterId], references: [id])
-  sellers    Sellers       @relation(fields: [sellerId], references: [id])
+  sellers    Sellers ?      @relation(fields: [sellerId], references: [id])
+  messages Messages[]
+}
+
+model Messages {
+  id String @id @default(uuid())
+  debterId String 
+  createdAt DateTime @default(now())
+  chatId String 
+  message String
+  chats Chat @relation(fields: [chatId], references: [id])
+  status MessageStatus @default(SEND)
 }
 
 model Payments {

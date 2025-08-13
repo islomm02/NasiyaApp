@@ -4,6 +4,9 @@ CREATE TYPE "public"."UsersRole" AS ENUM ('ADMIN', 'SUPER_ADMIN', 'SELLER', 'DEB
 -- CreateEnum
 CREATE TYPE "public"."MessageStatus" AS ENUM ('SEND', 'NOT_SEND', 'SENDING');
 
+-- CreateEnum
+CREATE TYPE "public"."DebtsStatus" AS ENUM ('NOT_PAID', 'PAID');
+
 -- CreateTable
 CREATE TABLE "public"."Sellers" (
     "id" TEXT NOT NULL,
@@ -15,6 +18,8 @@ CREATE TABLE "public"."Sellers" (
     "PINcode" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "email" TEXT NOT NULL,
+    "balance" INTEGER DEFAULT 0,
+    "image" TEXT DEFAULT '',
 
     CONSTRAINT "Sellers_pkey" PRIMARY KEY ("id")
 );
@@ -24,8 +29,9 @@ CREATE TABLE "public"."Debters" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
-    "debtId" TEXT NOT NULL,
     "sellerId" TEXT NOT NULL,
+    "star" BOOLEAN DEFAULT false,
+    "adress" TEXT,
 
     CONSTRAINT "Debters_pkey" PRIMARY KEY ("id")
 );
@@ -34,8 +40,18 @@ CREATE TABLE "public"."Debters" (
 CREATE TABLE "public"."Debt" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "term" TEXT NOT NULL,
+    "term" INTEGER,
+    "remainingMonths" INTEGER,
     "description" TEXT,
+    "status" "public"."DebtsStatus" NOT NULL DEFAULT 'NOT_PAID',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "startingTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "summaryAmount" INTEGER NOT NULL DEFAULT 0,
+    "remainingAmount" INTEGER NOT NULL DEFAULT 0,
+    "monthlyPayment" INTEGER NOT NULL DEFAULT 0,
+    "sellerId" TEXT,
+    "debterId" TEXT,
+    "nextPaymentDay" TIMESTAMP(3),
 
     CONSTRAINT "Debt_pkey" PRIMARY KEY ("id")
 );
@@ -55,10 +71,21 @@ CREATE TABLE "public"."Admin" (
 CREATE TABLE "public"."Chat" (
     "id" TEXT NOT NULL,
     "debterId" TEXT NOT NULL,
-    "message" TEXT NOT NULL,
-    "status" "public"."MessageStatus" NOT NULL DEFAULT 'SENDING',
+    "sellerId" TEXT DEFAULT '',
+    "messageId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Chat_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Messages" (
+    "id" TEXT NOT NULL,
+    "debterId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" "public"."MessageStatus" NOT NULL DEFAULT 'SEND',
+
+    CONSTRAINT "Messages_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -66,6 +93,8 @@ CREATE TABLE "public"."Payments" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "debtId" TEXT NOT NULL,
+    "month" INTEGER NOT NULL,
+    "sellerId" TEXT NOT NULL,
 
     CONSTRAINT "Payments_pkey" PRIMARY KEY ("id")
 );
@@ -100,10 +129,26 @@ CREATE TABLE "public"."FAQ" (
 -- CreateTable
 CREATE TABLE "public"."ImagesOfDebts" (
     "id" TEXT NOT NULL,
-    "image" TEXT NOT NULL,
+    "image" TEXT[],
     "debtId" TEXT NOT NULL,
 
     CONSTRAINT "ImagesOfDebts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Terms" (
+    "id" TEXT NOT NULL,
+    "term" TEXT NOT NULL,
+
+    CONSTRAINT "Terms_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Region" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+
+    CONSTRAINT "Region_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -119,13 +164,25 @@ CREATE UNIQUE INDEX "Sellers_email_key" ON "public"."Sellers"("email");
 CREATE UNIQUE INDEX "Admin_username_key" ON "public"."Admin"("username");
 
 -- AddForeignKey
-ALTER TABLE "public"."Debters" ADD CONSTRAINT "Debters_debtId_fkey" FOREIGN KEY ("debtId") REFERENCES "public"."Debt"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "public"."Debters" ADD CONSTRAINT "Debters_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "public"."Sellers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "public"."Debt" ADD CONSTRAINT "Debt_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "public"."Sellers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Debt" ADD CONSTRAINT "Debt_debterId_fkey" FOREIGN KEY ("debterId") REFERENCES "public"."Debters"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "public"."Chat" ADD CONSTRAINT "Chat_debterId_fkey" FOREIGN KEY ("debterId") REFERENCES "public"."Debters"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Chat" ADD CONSTRAINT "Chat_messageId_fkey" FOREIGN KEY ("messageId") REFERENCES "public"."Messages"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Chat" ADD CONSTRAINT "Chat_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "public"."Sellers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Payments" ADD CONSTRAINT "Payments_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "public"."Sellers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Payments" ADD CONSTRAINT "Payments_debtId_fkey" FOREIGN KEY ("debtId") REFERENCES "public"."Debt"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

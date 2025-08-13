@@ -91,15 +91,17 @@ export class DebterService {
   }
 
  async remove(id: string) {
-    try {
-      const debter = await this.prisma.debters.findFirst({where: {id}})
-      if(!debter){
-        return {message: "Debter with this id not found", status: 404}
-      }
-      const deleted = await this.prisma.debters.delete({where: {id}})
-      return deleted
-    } catch (error) {
-      return {message: error.message}
-    }
-  }
+  await this.prisma.imagesOfDebters.deleteMany({
+    where: { debterId: id }
+  });
+
+  await this.prisma.debt.deleteMany({
+    where: { debterId: id }
+  });
+
+  return this.prisma.debters.delete({
+    where: { id }
+  });
+}
+
 }

@@ -9,36 +9,32 @@ import { log } from 'console';
 export class ImagesDebtService {
   constructor(private prisma: PrismaService){}
   
-    async create(data: CreateImagesDebtDto) {
+   async create(data: CreateImagesDebtDto) {
   try {
     const oldImgs = await this.prisma.imagesOfDebts.findFirst({
       where: { debtId: data.debtId }
     });
 
-    // Eski rasm(lar)ni olish, massiv emas bo‘lsa, massivga aylantiramiz
-    const existingImages = Array.isArray(oldImgs?.image)
-      ? oldImgs.image
-      : oldImgs?.image ? [oldImgs.image] : [];
+    if (oldImgs) {
+      const updatedImages = [...(oldImgs.image || []), data.image];
 
-    // Yangi rasmni qo‘shamiz
-    const updatedImages = [...existingImages, data.image[0]];
-
-    console.log("Yangi rasm ro‘yxati:", updatedImages);
-
-    // Yangi yozuv yaratamiz
-    const newImg = await this.prisma.imagesOfDebts.create({
-      data: {
-        debtId: data.debtId,
-        image: updatedImages
-      }
-    });
-
-    return newImg;
-
+      return await this.prisma.imagesOfDebts.update({
+        where: { id: oldImgs.id },
+        data: { image: updatedImages }
+      });
+    } else {
+      return await this.prisma.imagesOfDebts.create({
+        data: {
+          debtId: data.debtId,
+          image: [data.image] 
+        }
+      });
+    }
   } catch (error) {
     return { message: error.message };
   }
 }
+
 
 
  async findOne(id: string) {

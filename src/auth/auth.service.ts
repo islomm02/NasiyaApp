@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { LoginAdminDto, LoginSellerDto, RefreshDto } from './dto/create-auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
@@ -18,6 +18,8 @@ export class AuthService {
         where: { login: loginSellerDto.login }
       });
 
+      
+
       if (!seller) {
          throw new NotFoundException('User not found');
           
@@ -25,18 +27,13 @@ export class AuthService {
 
       const match = bcrypt.compareSync(loginSellerDto.password, seller.password);
       if (!match) {
-        return { message: "Invalid password", status: 400 };
+        throw new BadRequestException("Invalid password")
       }
 
       const payload = { role: seller.role, id: seller.id };
 
-      const token = this.jwt.sign(payload, { expiresIn: '15m' }); // access token
-      const refreshToken = this.jwt.sign(payload, { expiresIn: '7d' }); // refresh token
-
-      await this.prisma.sellers.update({
-        where: { id: seller.id },
-        data: { refreshToken }
-      });
+      const token = this.jwt.sign(payload, { expiresIn: '7d' }); 
+      const refreshToken = this.jwt.sign(payload, { expiresIn: '7d' });
 
       return { token, refreshToken };
     } catch (error) {
@@ -62,13 +59,10 @@ export class AuthService {
 
       const payload = { role: seller.role, id: seller.id };
 
-      const token = this.jwt.sign(payload, { expiresIn: '15m' }); // access token
-      const refreshToken = this.jwt.sign(payload, { expiresIn: '7d' }); // refresh token
+      const token = this.jwt.sign(payload, { expiresIn: '15m' }); 
+      const refreshToken = this.jwt.sign(payload, { expiresIn: '7d' });
 
-      await this.prisma.sellers.update({
-        where: { id: seller.id },
-        data: { refreshToken }
-      });
+
 
       return { token, refreshToken };
     } catch (error) {
@@ -83,7 +77,7 @@ export class AuthService {
         where: { id: decoded.id }
       });
 
-      if (!seller || seller.refreshToken !== data.refreshToken) {
+      if (!seller ) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 

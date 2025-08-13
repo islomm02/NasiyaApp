@@ -7,5 +7,12 @@ export class CreatePayDebtDto {
     month: number
 }
 
+export class CreatePayDebtDtoAny {
+    @ApiProperty()
+    debtId: string
+    @ApiProperty()
+    amount: number
+}
+
 
 
