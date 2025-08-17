@@ -5,6 +5,8 @@ export class CreatePayDebtDto {
     debtId: string
     @ApiProperty()
     month: number
+    @ApiProperty()
+    amount: number
 }
 
 export class CreatePayDebtDtoAny {

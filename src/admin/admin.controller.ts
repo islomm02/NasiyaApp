@@ -13,17 +13,17 @@ import { GetQueryDto } from 'src/sellers/dto/QueryDto';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  // @RoleD(UsersRole.ADMIN)
-  // @UseGuards(RoleGuard)
-  // @UseGuards(TokenGuard)
+  @RoleD(UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);
   }
 
-  // @RoleD(UsersRole.ADMIN)
-  // @UseGuards(RoleGuard)
-  // @UseGuards(TokenGuard)
+  @RoleD(UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @Get()
   @ApiQueryComponent(["username", "phone"])
   findAll(@Query() query: GetQueryDto) {

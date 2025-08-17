@@ -79,4 +79,12 @@ export class ChatController {
   remove(@Param('id') id: string) {
     return this.chatService.remove(id);
   }
+
+  @RoleD(UsersRole.ADMIN, UsersRole.SELLER)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
+  @Delete('delete/:id')
+  removeAll(@Param('id') id: string) {
+    return this.chatService.removeAll(id);
+  }
 }

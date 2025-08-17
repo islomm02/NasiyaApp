@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginAdminDto, LoginSellerDto, RefreshDto } from './dto/create-auth.dto';
-import { ResetPasswordDto } from 'src/admin/dto/create-admin.dto';
 import { TokenGuard } from 'src/guards/token.guard';
 
 @Controller('auth')

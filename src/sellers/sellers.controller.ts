@@ -13,9 +13,9 @@ import { GetQueryDto } from './dto/QueryDto';
 export class SellersController {
   constructor(private readonly sellersService: SellersService) {}
 
-  // @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
-  // @UseGuards(RoleGuard)
-  // @UseGuards(TokenGuard)
+  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @Post()
   create(@Body() createSellerDto: CreateSellerDto) {
     return this.sellersService.create(createSellerDto);
@@ -40,16 +40,25 @@ export class SellersController {
     return this.sellersService.getMe(req["user"].id);
   }
 
+  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sellersService.findOne(id);
   }
 
+  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSellerDto: UpdateSellerDto) {
     return this.sellersService.update(id, updateSellerDto);
   }
 
+  @RoleD(UsersRole.SELLER, UsersRole.ADMIN)
+  @UseGuards(RoleGuard)
+  @UseGuards(TokenGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.sellersService.remove(id);

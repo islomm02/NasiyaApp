@@ -8,7 +8,11 @@ export class MessagesService {
   constructor(private prisma: PrismaService){}
   async create(data: CreateMessageDto) {
     try {
-      const message = await this.prisma.messages.create({data})
+      const chat = await this.prisma.chat.findFirst({where: {id: data.chatId}})
+      if(!chat){
+        throw new NotFoundException
+      }
+      const message = await this.prisma.messages.create({data: {...data, debterId: chat?.debterId}})
       return message
     } catch (error) {
       return {message: error.message}
@@ -17,17 +21,13 @@ export class MessagesService {
 
   async findAll(chatId?: string) {
   try {
-    const where: any = {};
+    
     if (chatId) {
-      where.chatId = chatId; 
+      const messages = await this.prisma.messages.findMany({where: {chatId}, orderBy: { createdAt: 'asc' }, })
+      return messages
+    }else{
+      return null
     }
-
-    const messages = await this.prisma.messages.findMany({
-      where,
-      orderBy: { createdAt: 'asc' }, 
-    });
-
-    return messages;
   } catch (error) {
     return { message: error.message };
   }

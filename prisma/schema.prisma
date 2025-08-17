@@ -79,10 +79,10 @@ model Admin {
 model Chat {
   id        String        @id @default(uuid())
   debterId  String
-  sellerId String? @default("")
+  sellerId String
   createdAt DateTime @default(now())
   debter    Debters       @relation(fields: [debterId], references: [id])
-  sellers    Sellers ?      @relation(fields: [sellerId], references: [id])
+  sellers    Sellers       @relation(fields: [sellerId], references: [id])
   messages Messages[]
 }
 
@@ -101,12 +101,14 @@ model Payments {
   createdAt DateTime  @default(now())
   debtId    String
   month     Int
+  amount Int ?
   debt      Debt      @relation(fields: [debtId], references: [id])
 }
 
 model ExampleMessages {
   id      String    @id @default(uuid())
   text    String
+  status Boolean? @default(true)
 
   sellerId String
   seller   Sellers   @relation(fields: [sellerId], references: [id])

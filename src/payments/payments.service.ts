@@ -45,7 +45,8 @@ async create(data: CreatePaymentDto) {
     await this.debtService.update(data.debtId, newDebtOptions)
 
     const payment = await this.prisma.payments.create({ data: {
-    month: 8,
+    month: data.month,
+    amount: data.amount,
     debt: { connect: { id: data.debtId } },
   } })
     return payment
@@ -57,13 +58,23 @@ async create(data: CreatePaymentDto) {
 
 
   async findAll() {
-    try {
-      const payments = await this.prisma.payments.findMany({include: {debt:true}})
-      return payments
-    } catch (error) {
-      return {message: error.message}
-    }
+  try {
+    const payments = await this.prisma.payments.findMany({
+      orderBy: {createdAt: "desc"},
+      include: {
+        debt: {
+          include: {
+            debter: true 
+          }
+        }
+      }
+    });
+    return payments;
+  } catch (error) {
+    return { message: error.message };
   }
+}
+
 
   async findOne(id: string) {
     try {

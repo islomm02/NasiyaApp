@@ -19,7 +19,7 @@ export class DebtService {
         throw new NotFoundException("debter not found")
       }
 
-      const startingTime = new Date();
+      const startingTime = data.createdAt ? data.createdAt : new Date();
       const nextPaymentDay = addMonths(startingTime, 1);
 
       const debt = await this.prisma.debt.create({
@@ -45,7 +45,7 @@ export class DebtService {
       where: {
         nextPaymentDay: {
           lt: new Date(),
-        },
+        },  
         status: {
           not: DebtsStatus.PAID,
         },

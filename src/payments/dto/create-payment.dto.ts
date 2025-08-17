@@ -5,4 +5,6 @@ export class CreatePaymentDto {
   debtId: string;
   @ApiProperty()
   month: number;
+  @ApiProperty()
+  amount: number;
 }

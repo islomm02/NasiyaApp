@@ -13,33 +13,30 @@ export class AuthService {
   ) {}
 
   async login(loginSellerDto: LoginSellerDto) {
-    try {
-      const seller = await this.prisma.sellers.findFirst({
-        where: { login: loginSellerDto.login }
-      });
+  try {
+    const seller = await this.prisma.sellers.findFirst({
+      where: { login: loginSellerDto.login },
+    });
 
-      
-
-      if (!seller) {
-         throw new NotFoundException('User not found');
-          
-      }
-
-      const match = bcrypt.compareSync(loginSellerDto.password, seller.password);
-      if (!match) {
-        throw new BadRequestException("Invalid password")
-      }
-
-      const payload = { role: seller.role, id: seller.id };
-
-      const token = this.jwt.sign(payload, { expiresIn: '7d' }); 
-      const refreshToken = this.jwt.sign(payload, { expiresIn: '7d' });
-
-      return { token, refreshToken };
-    } catch (error) {
-      return { message: error.message };
+    if (!seller) {
+      throw new NotFoundException("User not found");
     }
+
+    const match = await bcrypt.compare(loginSellerDto.password, seller.password);
+    if (!match) {
+      throw new BadRequestException("Invalid password");
+    }
+
+    const payload = { role: seller.role, id: seller.id };
+    const token = this.jwt.sign(payload, { expiresIn: "7d" });
+    const refreshToken = this.jwt.sign(payload, { expiresIn: "7d" });
+
+    return { token, refreshToken };
+  } catch (error) {
+    return { message: error.message };
   }
+}
+
 
   async loginAdmin(loginSellerDto: LoginAdminDto) {
     try {

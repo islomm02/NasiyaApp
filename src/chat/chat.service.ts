@@ -17,7 +17,7 @@ export class ChatService {
       throw new NotFoundException
     }
 
-    const newChat = await this.prisma.chat.create({data})
+    const newChat = await this.prisma.chat.create({data: {...data, sellerId}, include: {sellers: true, debter: true}})
 
     return newChat
   } catch (error) {
@@ -128,6 +128,21 @@ export class ChatService {
        if(!asd){
         throw new NotFoundException("Chat not found")
        }
+       const deleted = await this.prisma.chat.delete({where: {id}})
+       return deleted
+    } catch (error) {
+      return {message: error.message}
+    }
+  }
+  
+  
+  async removeAll(id: string) {
+    try {
+       const asd = await  this.prisma.chat.findFirst({where: {id}})
+       if(!asd){
+        throw new NotFoundException("Chat not found")
+       }
+       await this.prisma.messages.deleteMany({where: {chatId: asd.id}})
        const deleted = await this.prisma.chat.delete({where: {id}})
        return deleted
     } catch (error) {

@@ -56,6 +56,7 @@ export class PayDebtService {
 
       await this.prisma.payments.create({
         data: {
+          amount: debt.monthlyPayment,
           month: monthValue,
           debt: { connect: { id: debt.id } },
         },
@@ -118,6 +119,7 @@ export class PayDebtService {
 
       await this.prisma.payments.create({
         data: {
+          amount: createPayDebtDto.amount,
           month: monthValue,
           debt: { connect: { id: debt.id } },
         },
@@ -153,6 +155,7 @@ export class PayDebtService {
 
       await this.prisma.payments.create({
         data: {
+          amount: debt.remainingAmount,
           month: monthValue,
           debt: { connect: { id: debt.id } },
         },
