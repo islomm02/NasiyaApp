@@ -135,6 +135,7 @@ export class DebtService {
       if (!debt) {
         return { message: 'Debt With this Id not found', status: 404 };
       }
+      await this.prisma.imagesOfDebts.deleteMany({where: {debtId: debt.id}})
       const deleted = await this.prisma.debt.delete({ where: { id } });
       return deleted;
     } catch (error) {

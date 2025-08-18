@@ -24,51 +24,55 @@ export class TermsService {
   }
 
   async findAll(query: GetQueryDto) {
-    try {
-      const { search, sortBy, order, page, limit } = query;
-      const pageNumber = Number(page) || 1;
-      const limitNumber = Number(limit) || 10;
-      const skip = (pageNumber - 1) * limitNumber;
+  try {
+    const { search, sortBy, order, page, limit } = query;
+    const pageNumber = Number(page) || 1;
+    const limitNumber = limit ? Number(limit) : null;
+    const skip = limitNumber ? (pageNumber - 1) * limitNumber : undefined;
 
-      const [data, total] = await this.prisma.$transaction([
-        this.prisma.terms.findMany({
-          where: search
-            ? {
-                term: {
-                  contains: search,
-                  mode: 'insensitive',
-                },
-              }
-            : {},
-          // @ts-ignore
-          orderBy: {
-            [sortBy || 'term']: order === 'asc' ? 'asc' : 'desc',
-          },
-          skip,
-          take: limitNumber,
-        }),
-        this.prisma.terms.count({
-          where: search
-            ? {
-                term: {
-                  contains: search,
-                  mode: 'insensitive',
-                },
-              }
-            : {},
-        }),
-      ]);
+    // Ruxsat berilgan ustunlar (xavfsizlik uchun)
+    const validSortFields = ["term", "createdAt", "updatedAt"];
+    const sortField = "term";
 
-      return {
-        total,
-        page,
-        limit,
-        data,
-      };
-    } catch (error) {
-      return { message: error.message };
-    }
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.terms.findMany({
+        where: search
+          ? {
+              term: {
+                contains: search,
+                mode: "insensitive",
+              },
+            }
+          : {},
+        orderBy: {
+          [sortField]: order === "asc" ? "asc" : "desc",
+        },
+        skip,
+        take: limitNumber || undefined, 
+      }),
+      this.prisma.terms.count({
+        where: search
+          ? {
+              term: {
+                contains: search,
+                mode: "insensitive",
+              },
+            }
+          : {},
+      }),
+    ]);
+
+    return {
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+      data,
+    };
+  } catch (error) {
+    return { message: error.message };
   }
+}
+
 
   async findOne(id: string) {
     try {
