@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateImagesDebtDto } from './dto/create-images-debt.dto';
 import { UpdateImagesDebtDto } from './dto/update-images-debt.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -52,11 +52,29 @@ export class ImagesDebtService {
 }
 
 
-  update(id: number, updateImagesDebtDto: UpdateImagesDebtDto) {
-    return `This action updates a #${id} imagesDebt`;
+  async update(id: string, data: UpdateImagesDebtDto) {
+    try {
+      const imgs = await this.prisma.imagesOfDebts.findFirst({where: {id}})
+      if(!imgs){
+        throw new NotFoundException
+      }
+      const updated = await this.prisma.imagesOfDebts.update({where: {id}, data: data})
+      return updated
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} imagesDebt`;
+  async remove(id: string) {
+    try {
+      const imgs = await this.prisma.imagesOfDebts.findFirst({where: {id}})
+      if(!imgs){
+        throw new NotFoundException
+      }
+      const deleted = await this.prisma.imagesOfDebts.delete({where: {id}})
+      return deleted
+    } catch (error) {
+        console.log(error)
+    }
   }
 }
